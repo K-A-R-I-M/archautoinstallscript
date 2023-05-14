@@ -60,24 +60,38 @@ else
     exit 1
 fi
 
+echo "[DEBUG]############# DISK BASIC Partition #############"
+parted -s /dev/$chosendisk mklabel gpt
+parted -s /dev/$chosendisk mkpart ESP fat32 1MiB 513MiB
+parted -s /dev/$chosendisk set 1 boot on
+parted -s /dev/$chosendisk name 1 efi
+parted -s /dev/$chosendisk mkpart primary 513MiB 800MiB
+parted -s /dev/$chosendisk name 2 boot
+parted -s /dev/$chosendisk mkpart primary 800MiB 100%
+parted -s /dev/$chosendisk name 3 lvm-partition
+parted -s /dev/$chosendisk set 3 lvm on
+parted -s /dev/$chosendisk print
+parted -s /dev/$chosendisk quit
+
 echo "[DEBUG]############# LVM Partition #############"
-pvcreate /dev/$chosendisk
+pvcreate /dev/${chosendisk}
 pvs
-vgcreate mainvg /dev/$chosendisk
+vgcreate mainvg /dev/${chosendisk}3
 vgs
-lvcreate -L 8G mainvg -n boot
 lvcreate -L 16G mainvg -n swap
 lvcreate -l 100%FREE mainvg -n root
 lvs
 
 echo "[DEBUG]############# Creating filesystem #############"
-mkfs.vfat -F 32 /dev/mainvg/boot
+mkfs.vfat -F 32 /dev/sdX1
+mkfs.ext2 /dev/sdX2
 mkswap /dev/mainvg/swap
 mkfs.ext4 /dev/mainvg/root
 
 echo "[DEBUG]############# LVM Partition #############"
 mount /dev/mainvg/root /mnt
-mount --mkdir /dev/mainvg/boot /mnt/boot
+mount --mkdir /dev/sdX2 /mnt/boot
+mount --mkdir /dev/sdX1 /mnt/boot/efi
 swapon /dev/mainvg/swap
 
 
@@ -112,15 +126,13 @@ echo "[DEBUG]################### Passwd ###################"
 passwd
 
 echo "[DEBUG]################### GRUB ###################"
-mkdir /boot/EFI
-grub-install --target=x86_64-efi --efi-directory=/boot/EFI --recheck
-# cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+mkdir /boot/efi
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
+grub-mkconfig -o  /boot/efi/EFI/arch/grub.cfg
 
 echo "[DEBUG]################### END ###################"
 exit
-umount -a
-reboot
 EOF
 
 echo "[DEBUG]################### Chroot Script Setup ###################"
@@ -128,3 +140,8 @@ chmod +x /mnt/startup-chroot.sh
 
 echo "[DEBUG]################### Chroot ###################"
 arch-chroot /mnt ./startup-chroot.sh
+
+echo "#### umount"
+umount -a
+echo "#### reboot"
+reboot
