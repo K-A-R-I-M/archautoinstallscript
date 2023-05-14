@@ -113,8 +113,8 @@ passwd
 
 echo "[DEBUG]################### GRUB ###################"
 mkdir /boot/EFI
-grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
-cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
+grub-install --target=x86_64-efi --efi-directory=/boot/EFI --recheck
+# cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
 grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "[DEBUG]################### END ###################"
