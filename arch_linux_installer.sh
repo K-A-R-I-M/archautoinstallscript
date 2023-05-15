@@ -5,7 +5,7 @@ if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] UEFI works"
 else
     echo "[ERROR] UEFI not configured or available !!!"
-    exit 1
+    exit 0
 fi
 
 echo "[DEBUG]################### NETWORK ###################"
@@ -13,14 +13,14 @@ if [[ "0" == `ip link | grep "state UP" &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] Connection UP"
 else
     echo "[ERROR] No Connection"
-    exit 1
+    exit 0
 fi
 
 if [[ "0" == `ping -c 1 archlinux.org &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] test ping archlinux.org succeed"
 else
     echo "[ERROR] test ping archlinux.org failed"
-    exit 1
+    exit 0
 fi
 echo "[DEBUG]################### TIME ###################"
 echo "[DEBUG] Set time"
@@ -40,7 +40,7 @@ chosendisk="nvme0n1"
 #     echo "[DEBUG] ${chosendisk} is an available and a valid disk"
 # else
 #     echo "[ERROR] ${chosendisk} is not an available or not a valid disk"
-#     exit 1
+#     exit 0
 # fi
 
 # read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
@@ -48,7 +48,7 @@ chosendisk="nvme0n1"
 #     echo "[DEBUG] Let's go !!!!!!!!!!!!"
 # else
 #     echo "[END] Not destroying your data"
-#     exit 1
+#     exit 0
 # fi
 
 echo "[DEBUG]############# clean disk #############"
@@ -57,7 +57,7 @@ if [[ "0" == `wipefs -af /dev/$chosendisk &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] wipe succeed"
 else
     echo "[ERROR] wipe failed"
-    exit 1
+    exit 0
 fi
 
 echo "[DEBUG]############# DISK BASIC Partition #############"
