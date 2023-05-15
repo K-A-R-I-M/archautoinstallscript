@@ -149,6 +149,6 @@ echo "[DEBUG]################### Chroot ###################"
 arch-chroot /mnt ./startup-chroot.sh
 
 echo "#### umount"
-umount -a
+#umount -a
 echo "#### reboot"
-reboot
+#reboot
