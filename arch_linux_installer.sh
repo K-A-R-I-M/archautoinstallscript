@@ -58,24 +58,29 @@ else
     exit 1
 fi
 
+echo "[DEBUG]############# Basic Partition #############"
+
+parted -s /dev/$chosendisk mklabel gpt
+parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
+parted -s /dev/$chosendisk mkpart primary 8192MB 100%
+
 echo "[DEBUG]############# LVM Partition #############"
-pvcreate /dev/$chosendisk
+pvcreate /dev/${chosendisk}p2
 pvs
-vgcreate mainvg /dev/$chosendisk
+vgcreate mainvg /dev/${chosendisk}p2
 vgs
-lvcreate -L 8G mainvg -n boot
 lvcreate -L 16G mainvg -n swap
 lvcreate -l 100%FREE mainvg -n root
 lvs
 
 echo "[DEBUG]############# Creating filesystem #############"
-mkfs.vfat -F 32 /dev/mainvg/boot
+mkfs.vfat -F 32 /dev/${chosendisk}p1
 mkswap /dev/mainvg/swap
 mkfs.ext4 /dev/mainvg/root
 
 echo "[DEBUG]############# LVM Partition #############"
 mount /dev/mainvg/root /mnt
-mount --mkdir /dev/mainvg/boot /mnt/boot
+mount --mkdir /dev/${chosendisk}p1 /mnt/boot
 swapon /dev/mainvg/swap
 
 echo "[DEBUG]################### BASE INSTALL ###################"
