@@ -78,7 +78,7 @@ mkfs.vfat -F 32 /dev/${chosendisk}p1
 mkswap /dev/mainvg/swap
 mkfs.ext4 /dev/mainvg/root
 
-echo "[DEBUG]############# LVM Partition #############"
+echo "[DEBUG]############# Mount Partition #############"
 mount /dev/mainvg/root /mnt
 mount --mkdir /dev/${chosendisk}p1 /mnt/boot
 swapon /dev/mainvg/swap
