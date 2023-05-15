@@ -29,10 +29,10 @@ timedatectl set-ntp true
 echo "[DEBUG]################### DISK PATITION ###################"
 
 echo "[DEBUG] list of disks available : "
+lsblk -l | awk '/disk/ {print "----  "$1}'
 
-diskslist=$(lsblk -rdo NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}')
-chosendisk=$(dialog --menu "Select a disk:" 0 0 0 $diskslist 2>&1)
-
+# chosendisk="USER INPUT"
+read -p "Selected Disk: " chosendisk
 
 if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${chosendisk}( |$)" &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] ${chosendisk} is an available and a valid disk"
