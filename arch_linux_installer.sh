@@ -34,22 +34,22 @@ echo "[DEBUG] list of disks available : "
 lsblk -l | awk '/disk/ {print "----  "$1}'
 
 # chosendisk="USER INPUT"
-read -p "Selected Disk: " chosendisk
+# read -p "Selected Disk: " chosendisk
+chosendisk="nvme0n1"
+# if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${chosendisk}( |$)" &> /dev/null; echo $?` ]]; then
+#     echo "[DEBUG] ${chosendisk} is an available and a valid disk"
+# else
+#     echo "[ERROR] ${chosendisk} is not an available or not a valid disk"
+#     exit 1
+# fi
 
-if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${chosendisk}( |$)" &> /dev/null; echo $?` ]]; then
-    echo "[DEBUG] ${chosendisk} is an available and a valid disk"
-else
-    echo "[ERROR] ${chosendisk} is not an available or not a valid disk"
-    exit 1
-fi
-
-read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
-if [[ "$formatdiskchoice" == "y" ]]; then
-    echo "[DEBUG] Let's go !!!!!!!!!!!!"
-else
-    echo "[END] Not destroying your data"
-    exit 1
-fi
+# read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
+# if [[ "$formatdiskchoice" == "y" ]]; then
+#     echo "[DEBUG] Let's go !!!!!!!!!!!!"
+# else
+#     echo "[END] Not destroying your data"
+#     exit 1
+# fi
 
 echo "[DEBUG]############# clean disk #############"
 echo "wipefs -af /dev/$chosendisk"
@@ -61,39 +61,47 @@ else
 fi
 
 echo "[DEBUG]############# DISK BASIC Partition #############"
-parted -s /dev/$chosendisk mklabel gpt
-parted -s /dev/$chosendisk mkpart ESP fat32 1MiB 513MiB
-parted -s /dev/$chosendisk set 1 boot on
-parted -s /dev/$chosendisk name 1 efi
-parted -s /dev/$chosendisk mkpart primary 513MiB 800MiB
-parted -s /dev/$chosendisk name 2 boot
-parted -s /dev/$chosendisk mkpart primary 800MiB 100%
-parted -s /dev/$chosendisk name 3 lvm-partition
-parted -s /dev/$chosendisk set 3 lvm on
-parted -s /dev/$chosendisk print
-parted -s /dev/$chosendisk quit
+parted -s /dev/${chosendisk} mklabel gpt
+parted -s /dev/${chosendisk} mkpart primary 1MB 8192MB
+parted -s /dev/${chosendisk} mkpart primary 8192MB 24576MB
+parted -s /dev/${chosendisk} mkpart primary 24576MB 100%
+parted -s /dev/${chosendisk} set 1 esp on
+parted -s /dev/${chosendisk} set 2 swap on
 
-echo "[DEBUG]############# LVM Partition #############"
-pvcreate /dev/${chosendisk}
-pvs
-vgcreate mainvg /dev/${chosendisk}3
-vgs
-lvcreate -L 16G mainvg -n swap
-lvcreate -l 100%FREE mainvg -n root
-lvs
+
+# echo "[DEBUG]############# LVM Partition #############"
+# pvcreate /dev/${chosendisk}
+# pvs
+# vgcreate mainvg /dev/${chosendisk}3
+# vgs
+# lvcreate -L 16G mainvg -n swap
+# lvcreate -l 100%FREE mainvg -n root
+# lvs
 
 echo "[DEBUG]############# Creating filesystem #############"
-mkfs.vfat -F 32 /dev/sdX1
-mkfs.ext2 /dev/sdX2
-mkswap /dev/mainvg/swap
-mkfs.ext4 /dev/mainvg/root
+# mkfs.vfat -F 32 /dev/${chosendisk}p1
+# mkfs.ext2 /dev/${chosendisk}p2
+# mkswap /dev/mainvg/swap
+# mkfs.ext4 /dev/mainvg/root
+mkfs.vfat -F 32 /dev/${chosendisk}p1
+mkswap /dev/${chosendisk}p2
+mkfs.ext4 /dev/${chosendisk}p3
+
+
 
 echo "[DEBUG]############# LVM Partition #############"
-mount /dev/mainvg/root /mnt
-mount --mkdir /dev/sdX2 /mnt/boot
-mount --mkdir /dev/sdX1 /mnt/boot/efi
-swapon /dev/mainvg/swap
+# mount /dev/mainvg/root /mnt
+# mount --mkdir /dev/${chosendisk}p2 /mnt/boot
+# mount --mkdir /dev/${chosendisk}p1 /mnt/boot/efi
+# swapon /dev/mainvg/swap
+fatlabel /dev/${chosendisk}p1 EFI
+swaplabel -L SWAP /dev/${chosendisk}p2
+e2label /dev/${chosendisk}p3 SYS
 
+mount /dev/${chosendisk}p3 /mnt
+mkdir /mnt/boot
+mount /dev/${chosendisk}p1 /mnt/boot
+swapon -L SWAP
 
 echo "[DEBUG]################### BASE INSTALL ###################"
 pacstrap /mnt base linux linux-firmware ansible grub efibootmgr
@@ -127,9 +135,8 @@ passwd
 
 echo "[DEBUG]################### GRUB ###################"
 mkdir /boot/efi
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck
+grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
-grub-mkconfig -o  /boot/efi/EFI/arch/grub.cfg
 
 echo "[DEBUG]################### END ###################"
 exit
