@@ -57,13 +57,13 @@ else
     echo "[ERROR] wipe failed"
     exit 1
 fi
-
+sleep 2
 echo "[DEBUG]############# Basic Partition #############"
 
 parted -s /dev/$chosendisk mklabel gpt
 parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
 parted -s /dev/$chosendisk mkpart primary 8192MB 100%
-
+sleep 2
 echo "[DEBUG]############# LVM Partition #############"
 pvcreate /dev/${chosendisk}p2
 pvs
@@ -72,17 +72,17 @@ vgs
 lvcreate -L 16G mainvg -n swap
 lvcreate -l 100%FREE mainvg -n root
 lvs
-
+sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
 mkfs.vfat -F 32 /dev/${chosendisk}p1
 mkswap /dev/mainvg/swap
 mkfs.ext4 /dev/mainvg/root
-
+sleep 2
 echo "[DEBUG]############# Mount Partition #############"
 mount /dev/mainvg/root /mnt
 mount --mkdir /dev/${chosendisk}p1 /mnt/boot
 swapon /dev/mainvg/swap
-
+sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
 pacstrap /mnt base linux linux-firmware ansible grub efibootmgr
 
@@ -136,3 +136,4 @@ echo "#### umount"
 #umount -a
 echo "#### reboot"
 #reboot
+sleep 2
