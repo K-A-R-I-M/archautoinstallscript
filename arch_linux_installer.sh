@@ -65,7 +65,7 @@ parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
 parted -s /dev/$chosendisk mkpart primary 8192MB 100%
 sleep 2
 echo "[DEBUG]############# LVM Partition #############"
-pvcreate /dev/${chosendisk}p2
+pvcreate -ff /dev/${chosendisk}p2
 pvs
 vgcreate mainvg /dev/${chosendisk}p2
 vgs
@@ -95,6 +95,7 @@ ln -s /usr/lib/systemd/system/systemd-networkd.service /mnt/etc/systemd/system/m
 
 echo "[DEBUG]################### Network ###################"
 read -p "Selected a hostname: " chosenhostname
+sleep 2
 
 cat << EOF >> /mnt/startup-chroot.sh
 
@@ -126,7 +127,7 @@ echo "[DEBUG]################### Chroot Script Setup ###################"
 chmod +x /mnt/startup-chroot.sh
 
 echo "[DEBUG]################### Chroot ###################"
-if [[ "0" == `arch-chroot /mnt ./startup-chroot.sh &> /dev/null; echo $?` ]]; then
+if [[ "0" == `arch-chroot /mnt ./startup-chroot.sh; echo $?` ]]; then
     echo "[DEBUG] arch-chroot succeed"
 else
     echo "[ERROR] arch-chroot failed"
