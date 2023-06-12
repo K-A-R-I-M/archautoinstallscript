@@ -1,6 +1,6 @@
 # archautoinstallscript
 
-[![Made with Bash](https://img.shields.io/badge/Made%20with-Bash-1f825f.svg)](./src/index.js)
+[![Made with Bash](https://img.shields.io/badge/Made%20with-Bash-1f825f.svg)](./)
 
 ## Description
 Arch Linux auto installation script to do the fatest arch linux install you ever seen
