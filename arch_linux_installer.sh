@@ -1,12 +1,12 @@
 #!/bin/bash
 
-echo "[DEBUG]################### BOOTCHECK ###################"
-if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
-    echo "[DEBUG] UEFI works"
-else
-    echo "[ERROR] UEFI not configured or available !!!"
-    exit 0
-fi
+# echo "[DEBUG]################### BOOTCHECK ###################"
+# if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
+#     echo "[DEBUG] UEFI works"
+# else
+#     echo "[ERROR] UEFI not configured or available !!!"
+#     exit 0
+# fi
 
 echo "[DEBUG]################### NETWORK ###################"
 if [[ "0" == `ip link | grep "state UP" &> /dev/null; echo $?` ]]; then
@@ -65,22 +65,22 @@ parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
 parted -s /dev/$chosendisk mkpart primary 8192MB 100%
 sleep 2
 echo "[DEBUG]############# LVM Partition #############"
-pvcreate -ff /dev/${chosendisk}p2
+pvcreate -ff /dev/${chosendisk}2
 pvs
-vgcreate mainvg /dev/${chosendisk}p2
+vgcreate mainvg /dev/${chosendisk}2
 vgs
 lvcreate -L 16G mainvg -n swap
 lvcreate -l 100%FREE mainvg -n root
 lvs
 sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
-mkfs.vfat -F 32 /dev/${chosendisk}p1
+mkfs.vfat -F 32 /dev/${chosendisk}1
 mkswap /dev/mainvg/swap
 mkfs.ext4 /dev/mainvg/root
 sleep 2
 echo "[DEBUG]############# Mount Partition #############"
 mount /dev/mainvg/root /mnt
-mount --mkdir /dev/${chosendisk}p1 /mnt/boot
+mount --mkdir /dev/${chosendisk}1 /mnt/boot
 swapon /dev/mainvg/swap
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
@@ -124,7 +124,7 @@ exit
 EOF
 
 echo "[DEBUG]################### Chroot Script Setup ###################"
-chmod +x /mnt/startup-chroot.sh
+chmod +x /mnt/startup-chroot.sh && echo $?
 
 echo "[DEBUG]################### Chroot ###################"
 if [[ "0" == `arch-chroot /mnt ./startup-chroot.sh; echo $?` ]]; then
