@@ -34,8 +34,13 @@ lsblk -l | awk '/disk/ {print "----  "$1}'
 # chosendisk="USER INPUT"
 read -p "Selected Disk: " chosendisk
 
+is_sd=0
+
 if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${chosendisk}( |$)" &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] ${chosendisk} is an available and a valid disk"
+    if [[ ${chosendisk} == "sd"* ]]; then
+        is_sd=1
+    fi
 else
     echo "[ERROR] ${chosendisk} is not an available or not a valid disk"
     exit 1
@@ -59,29 +64,20 @@ else
 fi
 sleep 2
 echo "[DEBUG]############# Basic Partition #############"
-
 parted -s /dev/$chosendisk mklabel gpt
 parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
-parted -s /dev/$chosendisk mkpart primary 8192MB 100%
-sleep 2
-echo "[DEBUG]############# LVM Partition #############"
-pvcreate -ff /dev/${chosendisk}2
-pvs
-vgcreate mainvg /dev/${chosendisk}2
-vgs
-lvcreate -L 16G mainvg -n swap
-lvcreate -l 100%FREE mainvg -n root
-lvs
+parted -s /dev/$chosendisk mkpart primary 8192MB 16384MB
+parted -s /dev/$chosendisk mkpart primary 16384MB 100%
 sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
 mkfs.vfat -F 32 /dev/${chosendisk}1
-mkswap /dev/mainvg/swap
-mkfs.ext4 /dev/mainvg/root
+mkswap /dev/${chosendisk}2
+mkfs.ext4 /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]############# Mount Partition #############"
-mount /dev/mainvg/root /mnt
+mount /dev/${chosendisk}3 /mnt
 mount --mkdir /dev/${chosendisk}1 /mnt/boot
-swapon /dev/mainvg/swap
+swapon /dev/${chosendisk}2
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
 pacstrap /mnt base linux linux-firmware ansible grub efibootmgr
