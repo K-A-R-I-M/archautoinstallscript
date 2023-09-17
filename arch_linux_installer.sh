@@ -119,8 +119,9 @@ if [ -d /sys/firmware/efi ]; then
     grub-mkconfig -o /boot/grub/grub.cfg
 else
     echo "BIOS (Legacy) mode"
-    grub-install --target=i386-pc /dev/${chosendisk}
+    grub-install --target=i386-pc --recheck /dev/${chosendisk}
 fi
+update-grub
 
 
 echo "[DEBUG]################### END ###################"
