@@ -111,9 +111,16 @@ echo "[DEBUG]################### Passwd ###################"
 passwd
 
 echo "[DEBUG]################### GRUB ###################"
-mkdir /boot/efi
-grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
-grub-mkconfig -o /boot/grub/grub.cfg
+if [ -d /sys/firmware/efi ]; then
+    echo "UEFI mode"
+    mkdir /boot/efi
+    grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
+    grub-mkconfig -o /boot/grub/grub.cfg
+else
+    echo "BIOS (Legacy) mode"
+    grub-install --target=i386-pc /dev/${chosendisk}
+fi
+
 
 echo "[DEBUG]################### END ###################"
 exit
