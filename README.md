@@ -6,7 +6,10 @@
 Arch Linux auto installation script to do the fatest arch linux install you ever seen
 
 ## Installation
-TBD
+after booting on your archlinux iso
+```
+curl -o fast_install.sh https://raw.githubusercontent.com/K-A-R-I-M/archautoinstallscript/main/arch_linux_installer.sh; chmod +x ./fast_install.sh; ./fast_install.sh
+```
 
 ## Support
 [K-A-R-I-M](https://github.com/K-A-R-I-M)
