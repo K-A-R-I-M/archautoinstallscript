@@ -116,12 +116,11 @@ if [ -d /sys/firmware/efi ]; then
     echo "UEFI mode"
     mkdir /boot/efi
     grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
-    grub-mkconfig -o /boot/grub/grub.cfg
 else
     echo "BIOS (Legacy) mode"
     grub-install --target=i386-pc --recheck /dev/${chosendisk}
 fi
-update-grub
+grub-mkconfig -o /boot/grub/grub.cfg
 
 
 echo "[DEBUG]################### END ###################"
