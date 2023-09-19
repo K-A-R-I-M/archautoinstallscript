@@ -3,6 +3,7 @@ echo "[DEBUG]################### VARS ###################"
 uefi_boot=0
 root_passwd="root"
 hostname="arch"
+pacman -S networkmanager --noconfirm
 
 echo "[DEBUG]################### BOOTCHECK ###################"
 if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
@@ -103,7 +104,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 
 echo "[DEBUG]################### NetworkD ###################"
-ln -s /usr/lib/systemd/system/systemd-networkd.service /mnt/etc/systemd/system/multi-user.target.wants/
+ln -s /usr/lib/systemd/system/NetworkManager.service /mnt/etc/systemd/system/multi-user.target.wants/
 sleep 2
 
 cat << EOF >> /mnt/startup-chroot.sh
