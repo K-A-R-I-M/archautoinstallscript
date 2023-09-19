@@ -96,7 +96,7 @@ mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
 swapon /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
-pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim # ansible
+pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim bash-completion openssh zsh dhclient # ansible
 
 echo "[DEBUG]################### Fstab ###################"
 genfstab -U /mnt >> /mnt/etc/fstab
