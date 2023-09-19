@@ -66,7 +66,8 @@ sleep 2
 echo "[DEBUG]############# Basic Partition #############"
 parted -s /dev/$chosendisk mklabel gpt
 parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
-parted -s /dev/$chosendisk set 1 bios_grub on
+parted -s /dev/${chosendisk}1 set 1 bios_grub on
+parted -s /dev/${chosendisk}1 set 1 boot on
 parted -s /dev/$chosendisk mkpart primary 8192MB 16384MB
 parted -s /dev/$chosendisk mkpart primary 16384MB 100%
 sleep 2
@@ -81,7 +82,7 @@ mount --mkdir /dev/${chosendisk}1 /mnt/boot
 swapon /dev/${chosendisk}2
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
-pacstrap -K /mnt base linux linux-firmware ansible grub efibootmgr
+pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim # ansible
 
 echo "[DEBUG]################### Fstab ###################"
 genfstab -U /mnt >> /mnt/etc/fstab
