@@ -65,22 +65,30 @@ fi
 sleep 2
 echo "[DEBUG]############# Basic Partition #############"
 parted -s /dev/$chosendisk mklabel gpt
-parted -s /dev/$chosendisk mkpart primary 1MB 8192MB
+parted -s /dev/$chosendisk mkpart ESP fat32 1MB 513MB
+parted -s /dev/$chosendisk set 1 boot on
 if [ -d /sys/firmware/efi ]; then
     parted -s /dev/$chosendisk set 1 bios_grub on
 fi
-parted -s /dev/$chosendisk mkpart primary 8192MB 16384MB
+parted -s /dev/$chosendisk name 1 efi
+parted -s /dev/$chosendisk mkpart primary 513MB 1024MB
+parted -s /dev/$chosendisk name 2 boot
+parted -s /dev/$chosendisk mkpart primary 1024MB 16384MB
+parted -s /dev/$chosendisk name 3 swap
 parted -s /dev/$chosendisk mkpart primary 16384MB 100%
+parted -s /dev/$chosendisk name 4 root
 sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
 mkfs.vfat -F 32 /dev/${chosendisk}1
-mkswap /dev/${chosendisk}2
-mkfs.ext4 /dev/${chosendisk}3
+mkfs.ext2 /dev/${chosendisk}2
+mkswap /dev/${chosendisk}3
+mkfs.ext4 /dev/${chosendisk}4
 sleep 2
 echo "[DEBUG]############# Mount Partition #############"
-mount /dev/${chosendisk}3 /mnt
-mount --mkdir /dev/${chosendisk}1 /mnt/boot
-swapon /dev/${chosendisk}2
+mount /dev/${chosendisk}4 /mnt
+mount --mkdir /dev/${chosendisk}2 /mnt/boot
+mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
+swapon /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
 pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim # ansible
