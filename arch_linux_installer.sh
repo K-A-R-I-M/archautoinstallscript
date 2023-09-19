@@ -119,6 +119,9 @@ echo $hostname > /etc/hostname
 echo "[DEBUG]################### NetworkManager ###################"
 systemctl enable NetworkManager
 
+echo "[DEBUG]################### SSH ###################"
+systemctl enable sshd
+
 echo "[DEBUG]################### Passwd ###################"
 echo "root:${root_passwd}" | chpasswd
 
