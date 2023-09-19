@@ -124,7 +124,7 @@ echo "[DEBUG]################### Passwd ###################"
 echo "root:${root_passwd}" | chpasswd
 
 echo "[DEBUG]################### GRUB ###################"
-if [[ ${uefi_boot} == "0" ]]; then
+if [[ ${uefi_boot} == "1" ]]; then
     echo "UEFI mode"
     mkdir /boot/efi
     grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
