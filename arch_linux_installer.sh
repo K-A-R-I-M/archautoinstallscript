@@ -1,12 +1,16 @@
 #!/bin/bash
+echo "[DEBUG]################### VARS ###################"
+uefi_boot=0
+root_passwd="root"
 
-# echo "[DEBUG]################### BOOTCHECK ###################"
-# if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
-#     echo "[DEBUG] UEFI works"
-# else
-#     echo "[ERROR] UEFI not configured or available !!!"
-#     exit 0
-# fi
+echo "[DEBUG]################### BOOTCHECK ###################"
+if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
+    echo "[DEBUG] UEFI works"
+    uefi_boot=1
+else
+    echo "[ERROR] UEFI not configured or available !!!"
+    exit 0
+fi
 
 echo "[DEBUG]################### NETWORK ###################"
 if [[ "0" == `ip link | grep "state UP" &> /dev/null; echo $?` ]]; then
@@ -67,7 +71,7 @@ echo "[DEBUG]############# Basic Partition #############"
 parted -s /dev/$chosendisk mklabel gpt
 parted -s /dev/$chosendisk mkpart ESP fat32 1MB 513MB
 parted -s /dev/$chosendisk set 1 boot on
-if [ -d /sys/firmware/efi ]; then
+if [[ ${uefi_boot} == "0" ]]; then
     parted -s /dev/$chosendisk set 1 bios_grub on
 fi
 parted -s /dev/$chosendisk name 1 efi
@@ -119,10 +123,10 @@ echo "[DEBUG]################### Network ###################"
 echo $chosenhostname > /etc/hostname
 
 echo "[DEBUG]################### Passwd ###################"
-passwd
+echo "root:${root_passwd}" | chpasswd
 
 echo "[DEBUG]################### GRUB ###################"
-if [ -d /sys/firmware/efi ]; then
+if [[ ${uefi_boot} == "0" ]]; then
     echo "UEFI mode"
     mkdir /boot/efi
     grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
