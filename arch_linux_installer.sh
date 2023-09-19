@@ -2,6 +2,7 @@
 echo "[DEBUG]################### VARS ###################"
 uefi_boot=0
 root_passwd="root"
+hostname="arch"
 
 echo "[DEBUG]################### BOOTCHECK ###################"
 if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
@@ -103,9 +104,6 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "[DEBUG]################### NetworkD ###################"
 ln -s /usr/lib/systemd/system/systemd-networkd.service /mnt/etc/systemd/system/multi-user.target.wants/
-
-echo "[DEBUG]################### Network ###################"
-read -p "Selected a hostname: " chosenhostname
 sleep 2
 
 cat << EOF >> /mnt/startup-chroot.sh
@@ -120,7 +118,7 @@ locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 
 echo "[DEBUG]################### Network ###################"
-echo $chosenhostname > /etc/hostname
+echo $hostname > /etc/hostname
 
 echo "[DEBUG]################### Passwd ###################"
 echo "root:${root_passwd}" | chpasswd
