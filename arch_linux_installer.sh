@@ -44,7 +44,7 @@ done;
 
 DISK=$(whiptail --title "Disks List" --menu "Choose a disk" 16 78 10 "${choices_disks[@]}" 3>&1 1>&2 2>&3)
 is_sd=0
-
+chosendisk=${DISK}
 
 if [[ $DISK != "" ]];
 then
