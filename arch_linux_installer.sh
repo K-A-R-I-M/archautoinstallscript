@@ -34,7 +34,7 @@ timedatectl set-ntp true
 echo "[DEBUG]################### DISK PATITION ###################"
 
 echo '[DEBUG] fetch disks list...'	
-IFS=$'\n' disks=( $(lsblk -l | awk '/disk/ {print "----  "$1}') )
+IFS=$'\n' disks=( $(lsblk -l) )
 
 choices_disks=();
 for key in "${!disks[@]}";
