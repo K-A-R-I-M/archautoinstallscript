@@ -155,11 +155,12 @@ echo "[DEBUG]################### Chroot Script Setup ###################"
 chmod +x /mnt/startup-chroot.sh && echo $?
 
 echo "[DEBUG]################### Chroot ###################"
-if [[ "0" == `arch-chroot /mnt ./startup-chroot.sh; echo $?` ]]; then
+result=$(arch-chroot /mnt ./startup-chroot.sh; echo $?)
+if [[ "0" == $result ]]; then
     echo "[DEBUG] arch-chroot succeed"
 else
     echo "[ERROR] arch-chroot failed"
-    exit 0
+    echo $result
 fi
 echo "#### umount"
 umount -a
