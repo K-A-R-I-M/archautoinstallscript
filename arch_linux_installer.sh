@@ -34,7 +34,7 @@ timedatectl set-ntp true
 echo "[DEBUG]################### DISK PATITION ###################"
 
 echo '[DEBUG] fetch disks list...'	
-IFS=$'\n' disks=( $(lsblk -l) )
+IFS=$'\n' disks=( $(lsblk -ldn --output NAME) )
 
 choices_disks=();
 for key in "${!disks[@]}";
@@ -47,7 +47,7 @@ is_sd=0
 
 
 if [[ $DISK != "" ]];
-	then
+then
     if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${DISK}( |$)" &> /dev/null; echo $?` ]]; then
         echo "[DEBUG] ${DISK} is an available and a valid disk"
         if [[ ${DISK} == "sd"* ]]; then
@@ -57,6 +57,8 @@ if [[ $DISK != "" ]];
         echo "[ERROR] ${DISK} is not an available or not a valid disk"
         exit 1
     fi
+else 
+    exit 1
 fi
 
 read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
