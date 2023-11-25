@@ -33,22 +33,30 @@ timedatectl set-ntp true
 
 echo "[DEBUG]################### DISK PATITION ###################"
 
-echo "[DEBUG] list of disks available : "
-lsblk -l | awk '/disk/ {print "----  "$1}'
+echo '[DEBUG] fetch disks list...'	
+IFS=$'\n' disks=( $(lsblk -l | awk '/disk/ {print "----  "$1}') )
 
-# chosendisk="USER INPUT"
-read -p "Selected Disk: " chosendisk
+choices_disks=();
+for key in "${!disks[@]}";
+do
+	choices_disks+=("${disks[$key]}" "");
+done;
 
+DISK=$(whiptail --title "Disks List" --menu "Choose a disk" 16 78 10 "${choices_disks[@]}" 3>&1 1>&2 2>&3)
 is_sd=0
 
-if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${chosendisk}( |$)" &> /dev/null; echo $?` ]]; then
-    echo "[DEBUG] ${chosendisk} is an available and a valid disk"
-    if [[ ${chosendisk} == "sd"* ]]; then
-        is_sd=1
+
+if [[ $DISK != "" ]];
+	then
+    if [[ "0" == `lsblk -ldn --output NAME | grep -E "(^| )${DISK}( |$)" &> /dev/null; echo $?` ]]; then
+        echo "[DEBUG] ${DISK} is an available and a valid disk"
+        if [[ ${DISK} == "sd"* ]]; then
+            is_sd=1
+        fi
+    else
+        echo "[ERROR] ${DISK} is not an available or not a valid disk"
+        exit 1
     fi
-else
-    echo "[ERROR] ${chosendisk} is not an available or not a valid disk"
-    exit 1
 fi
 
 read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
@@ -96,7 +104,7 @@ mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
 swapon /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
-pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient ansible networkmanager
+pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager
 
 echo "[DEBUG]################### Fstab ###################"
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -152,7 +160,10 @@ else
     exit 0
 fi
 echo "#### umount"
-#umount -a
+umount -a
 echo "#### reboot"
-#reboot
+if whiptail --title "Final Reboot" --yesno "Your installation in finished! Do you want to reboot now?" 8 78;
+then
+    reboot
+fi
 sleep 2
