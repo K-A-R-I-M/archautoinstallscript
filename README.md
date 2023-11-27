@@ -30,12 +30,16 @@ Follow the instructions (according to your OS) in the link below
 
 ### Clone and Run
 
-after installing podman on your machine run
+after installing Podman on your machine run
+
+For Windows and Linux
 
 ```
 git clone https://github.com/K-A-R-I-M/archautoinstallscript.git
 cd archautoinstallscript
 make
+# or (if make fails)
+# sudo make (on Linux)
 ```
 
 ## Support
