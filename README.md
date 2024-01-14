@@ -1,10 +1,10 @@
 # Arch auto install scripts
 
-[![Made with Bash](https://img.shields.io/badge/Made%20with-Bash-1f825f.svg)](./)
+[![Shell Script](https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white)](./)[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](./)[![Arch](https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff&style=for-the-badge)](./)
 
 ## Description
 
-Arch Linux tools going from building iso to installing a minimalist Arch Linux
+Arch Linux tools going from building an Arch Linux iso using archiso to installing a minimalist Arch Linux
 
 Currently available:
 
@@ -13,6 +13,12 @@ Currently available:
 - setup to build custom arch linux iso with the auto install script in it
 
 ## Auto Install Script
+
+Requierment :
+
+```
+any archlinux iso
+```
 
 after booting on any archlinux iso run
 

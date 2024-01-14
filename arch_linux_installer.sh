@@ -3,6 +3,8 @@ echo "[DEBUG]################### VARS ###################"
 uefi_boot=0
 root_passwd="root"
 hostname="arch"
+swapon_size=2048MB
+# swapon_size=16384MB
 
 echo "[DEBUG]################### BOOTCHECK ###################"
 if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
@@ -42,9 +44,26 @@ do
 	choices_disks+=("${disks[$key]}" "");
 done;
 
-DISK=$(whiptail --title "Disks List" --menu "Choose a disk" 16 78 10 "${choices_disks[@]}" 3>&1 1>&2 2>&3)
-is_sd=0
-chosendisk=${DISK}
+choices_disks+=("check disks info" "")
+DISK=""
+
+_info_lsblk(){
+    lsblk > disks_display
+    whiptail --textbox disks_display 16 78 10
+    DISK=$(whiptail --title "Disks List" --menu "Choose a disk" 16 78 10 "${choices_disks[@]}" 3>&1 1>&2 2>&3)
+    is_sd=0
+    chosendisk=${DISK}
+}
+
+while true;
+do
+    _info_lsblk
+    if [[ $DISK != "" ]] && [[ $DISK != "check disks info" ]];
+    then
+        break
+    fi
+done
+
 
 if [[ $DISK != "" ]];
 then
@@ -88,9 +107,9 @@ fi
 parted -s /dev/$chosendisk name 1 efi
 parted -s /dev/$chosendisk mkpart primary 513MB 1024MB
 parted -s /dev/$chosendisk name 2 boot
-parted -s /dev/$chosendisk mkpart primary 1024MB 16384MB
+parted -s /dev/$chosendisk mkpart primary 1024MB $swapon_size
 parted -s /dev/$chosendisk name 3 swap
-parted -s /dev/$chosendisk mkpart primary 16384MB 100%
+parted -s /dev/$chosendisk mkpart primary $swapon_size 100%
 parted -s /dev/$chosendisk name 4 root
 sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
