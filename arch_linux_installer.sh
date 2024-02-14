@@ -1,10 +1,21 @@
 #!/bin/bash
-echo "[DEBUG]################### VARS ###################"
+echo "[DEBUG]################### DEFAULT VARS ###################"
 uefi_boot=0
 root_passwd="root"
 hostname="arch"
 swapon_size=2048MB
+base_packages="base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager"
 # swapon_size=16384MB
+
+if [ -f "config.json" ]; then
+echo "[DEBUG]################### config found !!! ###################"
+echo "[DEBUG]################### load config ###################"
+    uefi_boot=$(jq 'if .uefi_boot then 1 else 0 end' config.json | tr -d \")
+    root_passwd=$(jq '.root_passwd' config.json | tr -d \")
+    hostname=$(jq '.hostname' config.json | tr -d \")
+    swapon_size=$(jq '.swapon_size' config.json | tr -d \")
+    base_packages=$(jq '.base_packages' config.json | tr -d \")
+fi
 
 echo "[DEBUG]################### BOOTCHECK ###################"
 if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
@@ -125,7 +136,7 @@ mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
 swapon /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
-pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager
+pacstrap -K /mnt ${base_packages}
 
 echo "[DEBUG]################### Fstab ###################"
 genfstab -U /mnt >> /mnt/etc/fstab
