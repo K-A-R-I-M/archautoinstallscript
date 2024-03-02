@@ -9,7 +9,7 @@ cp /arch_linux_installer.sh /tmp/archiso_custom/archiso/configs/releng/airootfs/
 
 echo "[DEBUG]################### ADD FAST AUTO INSTALL SCRIPT TO STARTUP ###################"
 echo "chmod +x ~/.arch_linux_installer.sh || true" >> /tmp/archiso_custom/archiso/configs/releng/airootfs/root/.zlogin
-echo "~/.arch_linux_installer.sh" >> /tmp/archiso_custom/archiso/configs/releng/airootfs/root/.zlogin
+echo "~/.arch_linux_installer.sh | tee auto_install.log" >> /tmp/archiso_custom/archiso/configs/releng/airootfs/root/.zlogin
 
 cp -r /tmp/archiso_custom/archiso/configs/releng /tmp/archiso_custom/archiso/archiso/mkarchiso /tmp/archiso_custom/archiso_custom/
 rm -rf /tmp/archiso_custom/archiso

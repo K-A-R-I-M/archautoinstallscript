@@ -4,7 +4,6 @@ uefi_boot=0
 root_passwd="root"
 hostname="arch"
 swapon_size=2048MB
-base_packages="base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager"
 # swapon_size=16384MB
 
 if [ -f "config.json" ]; then
@@ -136,7 +135,7 @@ mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
 swapon /dev/${chosendisk}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
-pacstrap -K /mnt ${base_packages}
+pacstrap -K /mnt base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager
 
 echo "[DEBUG]################### Fstab ###################"
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -192,11 +191,17 @@ else
     echo "[ERROR] arch-chroot failed"
     echo $result
 fi
+
 echo "#### umount"
 umount -a
+
 echo "#### reboot"
-if whiptail --title "Final Reboot" --yesno "Your installation in finished! Do you want to reboot now?" 8 78;
+
+read -p "[[WARNING]] [[Final Reboot]] Your installation in finished! Do you want to reboot now? [y/n]: " formatdiskchoice
+if [[ "$formatdiskchoice" == "y" ]];
 then
+    echo "[DEBUG] Let's go !!!!!!!!!!!!"
     reboot
 fi
+
 sleep 2
