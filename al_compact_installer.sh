@@ -1,10 +1,25 @@
 #!/bin/bash
 echo "[DEBUG]################### DEFAULT VARS ###################"
-uefi_boot=0
-root_passwd="root"
-hostname="arch"
-swapon_size=2048MB
-# swapon_size=16384MB
+
+if [ -f "config.json" ]; then
+echo "[DEBUG]################### config found !!! ###################"
+echo "[DEBUG]################### load config ###################"
+    uefi_boot=$(jq 'if .uefi_boot then 1 else 0 end' config.json | tr -d \")
+    root_passwd=$(jq '.root_passwd' config.json | tr -d \")
+    hostname=$(jq '.hostname' config.json | tr -d \")
+    swapon_size=$(jq '.swapon_size' config.json | tr -d \")
+    base_packages=$(jq '.base_packages' config.json | tr -d \")
+    disk_name=$(jq '.disk_name' config.json | tr -d \")
+    echo "########################  config"
+    echo $uefi_boot
+    echo $root_passwd
+    echo $hostname
+    echo $swapon_size
+    echo $base_packages
+    echo $disk_name
+else
+    exit 1
+fi
 
 echo "[DEBUG]################### BOOTCHECK ###################"
 if [[ "0" == `ls /sys/firmware/efi/efivars &> /dev/null; echo $?` ]]; then
@@ -36,34 +51,9 @@ timedatectl set-ntp true
 echo "[DEBUG]################### DISK PATITION ###################"
 
 echo '[DEBUG] fetch disks list...'	
-IFS=$'\n' disks=( $(lsblk -ldn --output NAME) )
+lsblk -ldn --output NAME
 
-choices_disks=();
-for key in "${!disks[@]}";
-do
-	choices_disks+=("${disks[$key]}" "");
-done;
-
-choices_disks+=("check disks info" "")
-DISK=""
-
-_info_lsblk(){
-    lsblk > disks_display
-    whiptail --textbox disks_display 16 78 10
-    DISK=$(whiptail --title "Disks List" --menu "Choose a disk" 16 78 10 "${choices_disks[@]}" 3>&1 1>&2 2>&3)
-    is_sd=0
-    chosendisk=${DISK}
-}
-
-while true;
-do
-    _info_lsblk
-    if [[ $DISK != "" ]] && [[ $DISK != "check disks info" ]];
-    then
-        break
-    fi
-done
-
+DISK=$disk_name
 
 if [[ $DISK != "" ]];
 then
@@ -80,13 +70,14 @@ else
     exit 1
 fi
 
-read -p "[[!!!!!!!!WARNING!!!!!!!!]] Do you want to remove all your data from this disk [y/n]: " formatdiskchoice
-if [[ "$formatdiskchoice" == "y" ]]; then
-    echo "[DEBUG] Let's go !!!!!!!!!!!!"
-else
-    echo "[END] Not destroying your data"
-    exit 1
-fi
+echo "[[!!!  WARNING  !!!]]"
+echo "All your data will be removed from this disk you have 10 sec to cancel this with Ctrl + C :"
+for i in {1..10};
+do
+    echo $i
+    sleep 1
+done
+echo "[DEBUG] Let's go !!!!!!!!!!!!"
 
 echo "[DEBUG]############# clean disk #############"
 echo "wipefs -af /dev/$chosendisk"

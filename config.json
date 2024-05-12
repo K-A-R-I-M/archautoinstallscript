@@ -3,5 +3,6 @@
   "hostname": "arch",
   "root_passwd": "root",
   "swapon_size": "2048MB",
-  "base_packages": "base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager"
+  "base_packages": "base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager",
+  "disk_name": "sda"
 }

@@ -2,9 +2,9 @@ FROM docker.io/library/archlinux as builder
 
 COPY ./*.sh /
 
-RUN chmod +x /pull_modify_iso.sh
+COPY ./config.json /
 
-RUN chmod +x /arch_linux_installer.sh
+RUN chmod +x /*.sh
 
 RUN pacman -Suy --noconfirm
 
