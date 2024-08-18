@@ -51,7 +51,7 @@ timedatectl set-ntp true
 echo "[DEBUG]################### DISK PATITION ###################"
 
 echo '[DEBUG] fetch disks list...'	
-lsblk -ldn --output NAME
+lsblk -ldn --output NAME SIZE
 
 DISK=$disk_name
 
@@ -80,8 +80,8 @@ done
 echo "[DEBUG] Let's go !!!!!!!!!!!!"
 
 echo "[DEBUG]############# clean disk #############"
-echo "wipefs -af /dev/$chosendisk"
-if [[ "0" == `wipefs -af /dev/$chosendisk &> /dev/null; echo $?` ]]; then
+echo "wipefs -af /dev/$disk_name"
+if [[ "0" == `wipefs -af /dev/$disk_name &> /dev/null; echo $?` ]]; then
     echo "[DEBUG] wipe succeed"
 else
     echo "[ERROR] wipe failed"
@@ -89,31 +89,31 @@ else
 fi
 sleep 2
 echo "[DEBUG]############# Basic Partition #############"
-parted -s /dev/$chosendisk mklabel gpt
-parted -s /dev/$chosendisk mkpart ESP fat32 1MB 513MB
-parted -s /dev/$chosendisk set 1 boot on
+parted -s /dev/$disk_name mklabel gpt
+parted -s /dev/$disk_name mkpart ESP fat32 1MB 513MB
+parted -s /dev/$disk_name set 1 boot on
 if [[ ${uefi_boot} == "0" ]]; then
-    parted -s /dev/$chosendisk set 1 bios_grub on
+    parted -s /dev/$disk_name set 1 bios_grub on
 fi
-parted -s /dev/$chosendisk name 1 efi
-parted -s /dev/$chosendisk mkpart primary 513MB 1024MB
-parted -s /dev/$chosendisk name 2 boot
-parted -s /dev/$chosendisk mkpart primary 1024MB $swapon_size
-parted -s /dev/$chosendisk name 3 swap
-parted -s /dev/$chosendisk mkpart primary $swapon_size 100%
-parted -s /dev/$chosendisk name 4 root
+parted -s /dev/$disk_name name 1 efi
+parted -s /dev/$disk_name mkpart primary 513MB 1024MB
+parted -s /dev/$disk_name name 2 boot
+parted -s /dev/$disk_name mkpart primary 1024MB $swapon_size
+parted -s /dev/$disk_name name 3 swap
+parted -s /dev/$disk_name mkpart primary $swapon_size 100%
+parted -s /dev/$disk_name name 4 root
 sleep 2
 echo "[DEBUG]############# Creating filesystem #############"
-mkfs.vfat -F 32 /dev/${chosendisk}1
-mkfs.ext2 /dev/${chosendisk}2
-mkswap /dev/${chosendisk}3
-mkfs.ext4 /dev/${chosendisk}4
+mkfs.vfat -F 32 /dev/${disk_name}1
+mkfs.ext2 /dev/${disk_name}2
+mkswap /dev/${disk_name}3
+mkfs.ext4 /dev/${disk_name}4
 sleep 2
 echo "[DEBUG]############# Mount Partition #############"
-mount /dev/${chosendisk}4 /mnt
-mount --mkdir /dev/${chosendisk}2 /mnt/boot
-mount --mkdir /dev/${chosendisk}1 /mnt/boot/efi
-swapon /dev/${chosendisk}3
+mount /dev/${disk_name}4 /mnt
+mount --mkdir /dev/${disk_name}2 /mnt/boot
+mount --mkdir /dev/${disk_name}1 /mnt/boot/efi
+swapon /dev/${disk_name}3
 sleep 2
 echo "[DEBUG]################### BASE INSTALL ###################"
 pacstrap -K /mnt $base_packages
@@ -152,7 +152,7 @@ if [[ ${uefi_boot} == "1" ]]; then
     grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi --recheck
 else
     echo "BIOS (Legacy) mode"
-    grub-install --target=i386-pc --recheck /dev/${chosendisk}
+    grub-install --target=i386-pc --recheck /dev/${disk_name}
 fi
 grub-mkconfig -o /boot/grub/grub.cfg
 
