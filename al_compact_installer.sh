@@ -180,11 +180,14 @@ echo "#### reboot"
 
 echo "############################################################"
 echo "############################################################"
-read -p "[[WARNING]] [[Final Reboot]] Your installation in finished! Do you want to reboot now? [y/n]: " formatdiskchoice
-if [[ "$formatdiskchoice" == "y" ]];
-then
-    echo "[DEBUG] Let's go !!!!!!!!!!!!"
-    reboot
-fi
-
-sleep 2
+echo "[[!!!  WARNING  !!!]]"
+echo "[[WARNING]] [[Final Reboot]] Your installation in finished! your machine will be reboot !!!"
+echo "you have 10 sec to cancel this with Ctrl + C :"
+for i in {1..10};
+do
+    echo $i
+    sleep 1
+done
+echo "[DEBUG] Let's go !!!!!!!!!!!!"
+echo "[DEBUG] REBOOOOOOT !!!!!!!!!!!!"
+reboot
