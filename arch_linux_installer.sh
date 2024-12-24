@@ -4,6 +4,7 @@ uefi_boot=0
 root_passwd="root"
 hostname="arch"
 swapon_size=2048MB
+base_packages="base linux linux-firmware grub efibootmgr vim bash-completion openssh dhclient networkmanager dolphin alacritty sddm"
 # swapon_size=16384MB
 
 echo "[DEBUG]################### BOOTCHECK ###################"
